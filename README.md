@@ -1,24 +1,7 @@
-# Guardianes EHS — versión con logos corregidos
+# Guardianes EHS – Ranking con impresión A4
 
-Este ZIP está preparado para una estructura PLANA, igual a tu captura de GitHub:
+Abre `index.html` con Live Server, carga uno o varios archivos Excel y pulsa **ACTUALIZAR RANKING**. Después, pulsa **🖨 Imprimir ranking A4**.
 
-index.html
-logo_1rx.png
-logo_cai.png
-logo_calidad.png
-logo_cnd.png
-logo_los_20kg.png
-logo_los_cientificos.png
-logo_solvente.png
-logo_water_base.png
+La página abre el cuadro de impresión del navegador, con formato A4 horizontal. Puedes imprimir en papel o elegir **Guardar como PDF**. En la ventana de impresión selecciona **A4**, **Horizontal**, **Escala 100 %**, **Márgenes: predeterminados** y, para conservar los colores, **Gráficos de fondo**. El encabezado, indicadores, medidor y los ocho equipos están preparados para una sola página.
 
-**No coloques las imágenes dentro de una carpeta logos** con este HTML.
-
-## Si usas GitHub
-Sube `index.html` y todos los PNG a la raíz del repositorio. Si ya están los PNG, solo reemplaza `index.html`. Verifica las mayúsculas/minúsculas exactas. Publica y recarga la página con Ctrl+F5.
-
-## Si usas Live Server
-Abre la carpeta completa en VS Code, haz clic derecho en index.html > Open with Live Server.
-
-## Lectura de Excel
-La página lee Excel con SheetJS desde Internet. Selecciona archivo(s), elige mes individual o acumulado y presiona ACTUALIZAR RANKING. Las imágenes avanzan proporcionalmente a los puntos y la meta del período.
+Los archivos PNG se encuentran en la misma carpeta que `index.html`, tal como en tu repositorio. La lectura de Excel requiere Internet para cargar la librería SheetJS desde CDN.
