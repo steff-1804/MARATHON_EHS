@@ -72,6 +72,44 @@
  .rank-title,.gauge-title{break-after:avoid!important}
  .content-grid,.ranking,.team,.gauge-card,.ranking-card{break-inside:avoid!important;page-break-inside:avoid!important}
 }
+
+/* Barra vectorial exclusiva de impresión: el navegador imprime sus colores como gráficos,
+   incluso cuando la opción «gráficos de fondo» está desactivada. */
+.print-track-svg{display:none}
+@media print{
+ .track{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+ .track::after{display:none!important}
+ .track .fill{display:none!important}
+ .print-track-svg{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:visible!important;z-index:1!important}
+ .track .runner{z-index:3!important;filter:none!important}
+ .team-logo,.runner{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+}
+
+/* Ajuste compacto para evitar que el bloque del ranking salte a otra página. */
+@media print{
+ .hero{height:18mm!important;padding:2mm 5mm!important}
+ .print-meta{margin:1mm 0!important;padding:1mm 2mm!important}
+ .stats{margin:0 0 1.5mm!important;gap:1.5mm!important}
+ .stat{padding:1.2mm 2mm!important}
+ .stat .value{font-size:11pt!important;margin-top:.4mm!important}
+ .stat .sub{font-size:6pt!important;margin-top:0!important}
+ .content-grid{grid-template-columns:67mm minmax(0,1fr)!important;gap:2.5mm!important}
+ .ranking-card{padding:2mm!important}
+ .ranking{gap:1mm!important}
+ .team{min-height:11mm!important;padding:1mm 1.6mm!important;gap:1.5mm!important;grid-template-columns:7.5mm 9mm minmax(0,1fr) 17mm!important}
+ .place{width:7mm!important;height:7mm!important;font-size:9pt!important}
+ .team-logo{width:8.5mm!important;height:8.5mm!important}
+ .team-name{font-size:7.4pt!important;margin-bottom:.7mm!important}
+ .mini-tag{font-size:5pt!important;padding:.7mm 1mm!important}
+ .track{height:4.5mm!important}
+ .runner{width:7mm!important;height:7mm!important}
+ .score strong{font-size:11pt!important}
+ .gauge-card{padding:2mm!important}
+ .gauge-wrap svg{max-height:39mm!important}
+ .gauge-caption{font-size:6.5pt!important}
+ .legend{padding:1.2mm 0!important}
+ .mini-summary{margin-top:1.2mm!important}
+}
 </style>
 </head>
 <body>
@@ -324,7 +362,14 @@ function render(){
   return `<div class="team ${over?'over':low?'low':''}">
    <div class="place">${i+1}</div><img class="team-logo" src="${d.logo}" alt="Logo ${escapeHtml(d.team)}" onerror="this.style.display='none'">
    <div class="team-main"><div class="team-name"><span class="name-text">${escapeHtml(d.team)}</span><span class="mini-tag ${tag}">${status}</span></div>
-   <div class="track"><div class="fill" data-width="${Math.min(100,Math.max(0,d.progress))}"></div><img class="runner" src="${d.logo}" alt="" onerror="this.style.display='none'" data-left="${Math.min(95,Math.max(0,d.progress*.95))}"></div></div>
+   <div class="track"><div class="fill" data-width="${Math.min(100,Math.max(0,d.progress))}"></div>
+   <svg class="print-track-svg" viewBox="0 0 1000 50" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="printProgress${i}" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${low?'#90bdd9':'#49b9c4'}"/><stop offset="100%" stop-color="${low?'#efad64':over?'#f3bc46':'#25b18e'}"/></linearGradient></defs>
+    <rect x="0" y="0" width="1000" height="50" rx="24" fill="#cbdfee"/>
+    <rect x="0" y="0" width="${Math.min(1000,Math.max(0,d.progress*10))}" height="50" rx="24" fill="url(#printProgress${i})"/>
+    <rect x="993" y="2" width="7" height="46" rx="3" fill="#e5a628"/>
+   </svg>
+   <img class="runner" src="${d.logo}" alt="" onerror="this.style.display='none'" data-left="${Math.min(95,Math.max(0,d.progress*.95))}"></div></div>
    <div class="score"><strong>${d.available.length?fmt(d.total):'—'}</strong><small>${d.available.length?fmt(d.progress)+'%':'sin puntos'}</small></div>
    <div class="team-detail">${details}${d.available.length&&d.available.length<months.length?`<span class="missing">${d.available.length}/${months.length} meses con datos</span>`:''}</div>
   </div>`;
@@ -369,9 +414,16 @@ function init(){
  byId('startMonth').value='0';byId('monthCount').value='2';
  ['mode','startMonth','monthCount','threshold','goal'].forEach(id=>byId(id).addEventListener('change',render));
  byId('updateBtn').addEventListener('click',update);
+ // La impresión no debe depender de que termine la animación de pantalla.
+ function preparePrintProgress(){
+  document.querySelectorAll('#ranking .fill').forEach(el=>{el.style.width=el.dataset.width+'%';});
+  document.querySelectorAll('#ranking .runner').forEach(el=>{el.style.left=el.dataset.left+'%';});
+ }
+ window.addEventListener('beforeprint',preparePrintProgress);
  byId('printBtn').addEventListener('click',()=>{
   if(!loaded){showStatus('Primero carga un Excel y presiona Actualizar ranking para imprimir resultados.','warning');return;}
   render();
+  preparePrintProgress();
   const fecha=new Date().toLocaleDateString('es-EC',{year:'numeric',month:'2-digit',day:'2-digit'});
   byId('printMeta').textContent+='  |  Impreso: '+fecha;
   window.print();
